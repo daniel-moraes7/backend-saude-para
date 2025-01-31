@@ -1,6 +1,12 @@
+import componentsRouter from "./routes/components";
+import tipoQualificacaoRouter from "./routes/tipoQualificacao";
+import tipoHabilitacaoRouter from "./routes/tipoHabilitacao";
+import tipoEstabelecimentoRouter from "./routes/tipoEstabelecimento";
+import turnoRouter from "./routes/turnoRouter";
+import naturezaRouter from "./routes/natureza";
+import estabelecimentoRouter from "./routes/estabelecimento.routes";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
-import routes from "./routes/index";
 import pino from "pino";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
@@ -57,7 +63,13 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 });
 
 // Rotas da API
-app.use("/api", routes);
+app.use("/componentes", componentsRouter);
+app.use("/tipo-qualificacao", tipoQualificacaoRouter);
+app.use("/tipo-habilitacao", tipoHabilitacaoRouter);
+app.use("/tipo-estabelecimento", tipoEstabelecimentoRouter);
+app.use("/turnos", turnoRouter);
+app.use("/natureza", naturezaRouter);
+app.use("/estabelecimentos", estabelecimentoRouter);
 
 // Endpoints básicos
 app.get("/health", (_req: Request, res: Response) => {
