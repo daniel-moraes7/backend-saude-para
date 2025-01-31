@@ -63,13 +63,13 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 });
 
 // Rotas da API
-app.use("/componentes", componentsRouter);
-app.use("/tipo-qualificacao", tipoQualificacaoRouter);
-app.use("/tipo-habilitacao", tipoHabilitacaoRouter);
-app.use("/tipo-estabelecimento", tipoEstabelecimentoRouter);
-app.use("/turnos", turnoRouter);
-app.use("/natureza", naturezaRouter);
-app.use("/estabelecimentos", estabelecimentoRouter);
+app.use("api/componentes", componentsRouter);
+app.use("api/tipo-qualificacao", tipoQualificacaoRouter);
+app.use("api/tipo-habilitacao", tipoHabilitacaoRouter);
+app.use("api/tipo-estabelecimento", tipoEstabelecimentoRouter);
+app.use("api/turnos", turnoRouter);
+app.use("api/natureza", naturezaRouter);
+app.use("api/estabelecimentos", estabelecimentoRouter);
 
 // Endpoints básicos
 app.get("/health", (_req: Request, res: Response) => {
