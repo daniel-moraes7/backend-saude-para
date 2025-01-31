@@ -57,17 +57,50 @@ router.get("/", async (req: Request, res: Response) => {
  */
 router.get("/paginated", async (req: Request, res: Response) => {
   try {
+    // Adicionando logs para debug
+    console.log("Requisição recebida em /paginated");
+    console.log("Query params:", {
+      page: req.query.page,
+      limit: req.query.limit,
+      search: req.query.search,
+      sortKey: req.query.sortKey,
+      sortOrder: req.query.sortOrder
+    });
+
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
     const searchTerm = req.query.search?.toString() || "";
     const sortKey = req.query.sortKey?.toString() || "idestabelecimento";
     const sortOrder = (req.query.sortOrder?.toString() || "asc") as "asc" | "desc";
 
-    const result = await EstabelecimentoService.getAllPaginated(page, limit, searchTerm, sortKey, sortOrder);
+    console.log("Parâmetros processados:", {
+      page,
+      limit,
+      searchTerm,
+      sortKey,
+      sortOrder
+    });
+
+    const result = await EstabelecimentoService.getAllPaginated(
+      page, 
+      limit, 
+      searchTerm, 
+      sortKey, 
+      sortOrder
+    );
+    
+    console.log("Resultado obtido:", {
+      total: result.meta.total,
+      registros: result.data.length
+    });
+
     return res.json(result);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Erro na paginação de estabelecimentos" });
+    console.error("Erro detalhado:", error);
+    return res.status(500).json({ 
+      error: "Erro na paginação de estabelecimentos",
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
   }
 });
 

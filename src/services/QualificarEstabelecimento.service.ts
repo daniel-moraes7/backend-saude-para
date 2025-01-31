@@ -125,7 +125,9 @@ export const EstabelecimentoService = {
     sortOrder: "asc" | "desc" = "asc"
   ): Promise<PaginatedResponse<Estabelecimento>> => {
     try {
+      console.log("Iniciando getAllPaginated no service");
       const offset = (page - 1) * limit;
+      
       let query = `
         SELECT 
           idestabelecimento,
@@ -145,24 +147,50 @@ export const EstabelecimentoService = {
           ativo
         FROM estabelecimento
       `;
-      const countQuery = "SELECT COUNT(*) AS total FROM estabelecimento";
+      
       const params: any[] = [];
-
+  
       if (searchTerm) {
         query += `
           WHERE nome LIKE ? OR cnes LIKE ? OR cnpj LIKE ?
         `;
         params.push(`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`);
       }
-
-      query += ` ORDER BY ${sortKey} ${sortOrder.toUpperCase()} LIMIT ? OFFSET ?`;
+  
+      // Validando a coluna de ordenação
+      const validColumns = [
+        'idestabelecimento', 'codigo_unidade', 'nome', 'cnes', 
+        'cnpj', 'cidade', 'logradouro', 'bairro', 'numero', 
+        'ativo'
+      ];
+      
+      const safeSort = validColumns.includes(sortKey) ? sortKey : 'idestabelecimento';
+      query += ` ORDER BY ${safeSort} ${sortOrder.toUpperCase()} LIMIT ? OFFSET ?`;
       params.push(limit, offset);
-
+  
+      console.log("Query construída:", query);
+      console.log("Parâmetros:", params);
+  
+      // Query para contar o total
+      const countQuery = searchTerm
+        ? `SELECT COUNT(*) AS total FROM estabelecimento WHERE nome LIKE ? OR cnes LIKE ? OR cnpj LIKE ?`
+        : `SELECT COUNT(*) AS total FROM estabelecimento`;
+  
       const [rows] = await pool.query(query, params);
-      const [countResult] = await pool.query<RowDataPacket[]>(countQuery, params.slice(0, -2));
+      const [countResult] = await pool.query<RowDataPacket[]>(
+        countQuery, 
+        searchTerm ? [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`] : []
+      );
+  
       const total = Number(countResult[0]?.total) || 0;
       const totalPages = Math.ceil(total / limit);
-
+  
+      console.log("Resultado obtido:", {
+        registros: (rows as any[]).length,
+        total,
+        totalPages
+      });
+  
       return {
         data: rows as Estabelecimento[],
         meta: {
@@ -173,8 +201,12 @@ export const EstabelecimentoService = {
         },
       };
     } catch (error) {
-      console.error("Erro na listagem paginada:", error);
-      throw new BusinessError("Falha ao carregar lista de estabelecimentos");
+      console.error("Erro detalhado no service:", error);
+      throw new Error(
+        error instanceof Error 
+          ? `Falha ao carregar lista de estabelecimentos: ${error.message}`
+          : 'Erro desconhecido ao carregar estabelecimentos'
+      );
     }
   },
 
