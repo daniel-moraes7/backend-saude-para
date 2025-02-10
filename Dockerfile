@@ -1,24 +1,21 @@
-# Usar uma imagem base Node.js oficial
 FROM node:18-alpine
 
-# Criar e definir o diretório de trabalho
 WORKDIR /app
 
-# Copiar os arquivos package.json e package-lock.json
-COPY package*.json ./
+# Primeiro copiamos os arquivos de configuração E o código fonte
+COPY package*.json tsconfig*.json ./
+COPY src/ ./src/
 
-# Instalar as dependências
-RUN npm install --production
+# Agora instalamos as dependências
+RUN npm install
 
-# Copiar todo o conteúdo da build
-COPY dist/ ./dist/
-
-# Copiar arquivos de configuração se existirem
+# Copiar outros arquivos de configuração
 COPY .env* ./
 COPY config* ./config/
 
-# Expor a porta que sua API usa
+# Limpar dependências de desenvolvimento
+RUN npm prune --production
+
 EXPOSE 3001
 
-# Comando para iniciar a aplicação
 CMD ["npm", "start"]
